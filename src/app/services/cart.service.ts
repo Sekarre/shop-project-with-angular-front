@@ -42,7 +42,7 @@ export class CartService {
     this.computeCartTotals();
   }
 
-  private computeCartTotals() {
+  computeCartTotals() {
     let totalPriceValue: number = 0;
     let totalQuantityValue: number = 0;
 
@@ -54,20 +54,28 @@ export class CartService {
     //publish the new values
     this.totalPrice.next(totalPriceValue);
     this.totalQuantity.next(totalQuantityValue);
-
-    //log cart data for debug
-    this.logCartData(totalPriceValue, totalQuantityValue);
   }
 
-  private logCartData(totalPriceValue: number, totalQuantityValue: number) {
-    console.log('Contents of the cart');
-    for (let tempCartItem of this.cartItems) {
-      const subTotalPrice = tempCartItem.quantity * tempCartItem.unitPrice;
-      console.log(`name: ${tempCartItem.name}, quantitty=${tempCartItem.quantity}, unitPrice=${tempCartItem.unitPrice},
-      subTotalPrice=${subTotalPrice}`);
+
+  decrementQuantity(tempCartItem: CartItem) {
+    tempCartItem.quantity--;
+
+    if (tempCartItem.quantity === 0) {
+      this.remove(tempCartItem);
+    } else {
+      this.computeCartTotals();
     }
-
-    console.log(`totalPrice: ${totalPriceValue.toFixed(2)}, totalQuantityValue: ${totalQuantityValue} `);
-    console.log(`--------`)
   }
+
+  remove(tempCartItem: CartItem) {
+
+    const itemIndex = this.cartItems.findIndex(cartItem => tempCartItem.id === cartItem.id);
+
+    if (itemIndex > -1) {
+      this.cartItems.splice(itemIndex, 1);
+
+      this.computeCartTotals();
+    }
+  }
+
 }
